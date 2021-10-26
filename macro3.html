@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Macro Assignment 03: Gotta Catch 'em All!</title>
+
+
+	<style type="text/css">
+
+		#forest{
+			background-image: url('images/environment_forestbackground.png'); /* ********  */
+			width: 800px;
+			height: 600px;
+			position: relative;
+
+			float: left;  /* ****** */
+		}
+
+		.grass:hover{
+			background-color: yellow;
+			opacity: .4;
+		}
+
+		#grass1{
+			position: absolute;
+			left: 0px;
+			bottom: 0px;
+		}
+
+		#grass2{
+			position: absolute;
+			left: 270px;
+			bottom: 0px;
+		}
+		#grass3{
+			position: absolute;
+			left: 540px;
+			bottom: 0px;
+		}
+
+		#playagain{
+			display:none;  /****** hide the button */
+		}
+
+		#over{
+			position: absolute;
+			font-size: 50px;
+			background-color: red;
+			color: yellow;
+			left: 250px;
+			top: 200px;
+			display: none;
+		}
+
+		#status{
+			font-weight: bold;
+			font-size: 30px;
+		}
+
+		#result{
+			position: absolute;
+			width: 100%;
+			height: 20%;
+			bottom: -50px;
+			left: 50px;
+			font-size: 30px;
+
+		}
+
+		#clean{
+			position: absolute;
+			bottom: 100px;
+			right: 400px;
+			width: 120px;
+			height: 80px;
+			font-size: 20px;
+			font-weight: bold;
+		}
+
+		#allhis{
+			position: absolute;
+			bottom: -100px;
+			left: 50px;
+			font-size: 20px;
+
+
+		}
+	
+
+	</style>
+
+
+</head>
+<body>
+
+	<div id="container"> 
+		<div id="forest">
+			<img class='grass' id='grass1' src="images/grass.png">
+			<img class='grass' id='grass2' src="images/grass.png">
+			<img class='grass' id='grass3' src="images/grass.png">
+		</div>
+		<div id="game">
+			<h1> Gotta Catch 'em All! </h1>
+			<p>Your goal in this game is to earn as many Pokeballs as possible while catching a variety of Pokemon along the way. <br>
+			To play simply click on one of the three grass clumps. Behind one of those grass clumps is a Pokemon that can be caught. Behind another grass clump are two free Pokealls that you can use to try again, and behind the last grass clump is nothing. <br><br>
+			Note that each time you can pick a grass clump you will be using one of your Pokeballs, and when you run out the game will be over! </p>
+
+
+			<p id = 'status'>Your progress so far...</p>
+			<p id = 'output_pokeballs'>Pokeballs left: 5</p>
+			<p id = 'output_pokecaught'>Pokemon caught: 0</p>
+
+			<p id= 'special'> </p>
+
+			<button id='playagain'> Play Again!</button>
+		</div>
+
+		<div id = 'over'>
+			<p> Game Over!</p>
+			
+		</div>
+
+
+	</div>
+
+	<div id="result">
+		Result history:
+		
+	</div>
+
+	<div id='allhis'>
+		All history:
+	</div>
+
+	<button id='clean'>
+		clean history
+	</button>
+
+
+	<script type="text/javascript">
+
+		var pokeBalls = 5;
+		var pokemonCaught = 0;
+
+
+		/* DOM references */
+		let playAgain = document.getElementById('playagain');
+
+		let g1 = document.getElementById('grass1');
+		let g2 = document.getElementById('grass2');		
+		let g3 = document.getElementById('grass3');
+
+		let outputPokeballs = document.getElementById('output_pokeballs')
+		let outputPokecaught = document.getElementById('output_pokecaught')
+
+
+		let pokemon1 = ['images/pikachu.png', 'images/bulbasaur.png', 'images/charmander.png', 'images/eevee.png', 'images/squirtle.png'];
+		let names1 = ['Pikachu', 'Bulbasaur', 'Charmander', 'Eevee', 'Squirtle'];
+
+		let pokemon2 = ['images/pikachu.png', 'images/bulbasaur.png', 'images/charmander.png', 'images/eevee.png', 'images/squirtle.png'];
+		let names2 = ['Pikachu', 'Bulbasaur', 'Charmander', 'Eevee', 'Squirtle'];
+
+		let pokemon3 = ['images/pikachu.png', 'images/bulbasaur.png', 'images/charmander.png', 'images/eevee.png', 'images/squirtle.png'];
+		let names3 = ['Pikachu', 'Bulbasaur', 'Charmander', 'Eevee', 'Squirtle'];
+
+		var pikachu_num = 0;
+		var bulbasaur_num = 0;
+		var charmander_num = 0;
+		var eevee_num = 0;
+		var squirtle_num = 0;
+
+
+		let gameover = document.getElementById('over')
+
+		let progress = document.getElementById('status')
+
+		let final = document.getElementById('result')
+
+		let clean_history = document.getElementById('clean')
+
+		let special_message = document.getElementById('special')
+
+		let all_history = document.getElementById('allhis')
+		all_string = ''
+
+
+
+		
+		/*event listener*/
+
+		var over = "False"
+
+		var lock = false
+
+
+
+		g1.onclick = function (){     // //  
+
+
+			if ((pokeBalls > 0) && lock == false){
+
+				pokeBalls -= 1;
+
+				let chance = parseInt(Math.random() *3);
+				 if (chance == 0){
+				 	let pokemonnum = parseInt(Math.random() * pokemon1.length)
+				 	g1.src = pokemon1[pokemonnum];  //  // change the image url!!! ////
+				 	pokemon1.splice(pokemonnum,1)
+
+				 	progress.innerHTML = `You caught a(n) ${names1[pokemonnum]}`
+
+
+				 	if (names1[pokemonnum] == 'Pikachu'){
+				 		pikachu_num += 1
+				 		all_string = "Pikachu found" + all_string
+				 	}
+				 	else if (names1[pokemonnum] == 'Bulbasaur'){
+				 		bulbasaur_num += 1
+				 		all_string = "Bulbasaur found" + all_string
+				 	}
+				 	else if (names1[pokemonnum] == 'Charmander'){
+				 		charmander_num += 1
+				 		all_string = "Charmander found" + all_string
+				 	}
+				 	else if (names1[pokemonnum] == 'Eevee'){
+				 		eevee_num += 1
+				 		all_string = 'Eevee found' + all_string
+				 	}
+				 	else{
+				 		squirtle_num += 1
+				 		all_string = 'Squirtle found' + all_string
+				 	}
+
+				 	names1.splice(pokemonnum,1)
+				 	
+
+				 	if (pokemon1.length != 0){
+				 		pokemonCaught += 1;
+				 	}
+
+				 	else{
+				 		pokemonCaught += 0
+				 		
+				 	}
+				 }
+
+				 else if (chance == 1){
+				 	g1.src = 'images/pokeballs.png';
+				 	pokeBalls += 2;
+				 	progress.innerHTML = "You found two Pokeballs!"
+				 	all_string = "Pokeballs found" + all_string
+				 }
+
+				 else{
+				 	g1.src = '';
+				 	progress.innerHTML = "Nothing here!"
+				 	all_string = "Nothing found" + all_string
+				 }
+
+				outputPokeballs.innerHTML = 'Pokeballs Left ' + pokeBalls ////  //////
+				outputPokecaught.innerHTML = 'Pokemon Caught ' + pokemonCaught		
+
+				playAgain.style.display = 'block'  //  ///to show the button!
+
+				lock = true
+
+			}
+
+			else if ((pokeBalls >0) && lock == true){
+
+				gameover.style.display='none';
+				over = 'False'
+
+
+			}
+
+			else {
+
+				g1.src = 'images/grass.png'
+
+				gameover.style.display='flex'
+
+				over = "True"
+
+				all_history.innerHTML = all_string
+
+			}
+
+
+			if (over == 'True'){
+
+				pokemonCaught = 0
+				pokeBalls = 5
+
+				gameover.style.display = 'flex'
+
+				over = 'False'
+
+				final.innerHTML = `${pikachu_num} ${names1[0]}, ${bulbasaur_num} ${names1[1]}, ${charmander_num} ${names1[2]}, ${eevee_num} ${names1[3]}, ${squirtle_num} ${names1[4]} `
+
+				if (pikachu_num>=1 && bulbasaur_num>=1 && charmander_num>=1 && eevee_num>=1 && squirtle_num>=1){
+					special_message.innerHTML='Congrats! You caught at least one of each kind!'
+				}
+
+
+
+			}
+			else{
+				gameover.style.display = 'none'
+				pokemon1 = ['images/pikachu.png', 'images/bulbasaur.png', 'images/charmander.png', 'images/eevee.png', 'images/squirtle.png'];
+				names1 = ['Pikachu', 'Bulbasaur', 'Charmander', 'Eevee', 'Squirtle'];
+
+			}
+		}
+
+
+
+
+
+		g2.onclick = function (){     // //  
+
+
+			if ((pokeBalls > 0) && lock == false){
+
+				pokeBalls -= 1;
+
+				let chance = parseInt(Math.random() *3);
+				 if (chance == 0){
+				 	let pokemonnum = parseInt(Math.random() * pokemon2.length)
+				 	g2.src = pokemon2[pokemonnum];  //  // change the image url!!! ////
+				 	pokemon2.splice(pokemonnum,1)
+
+				 	progress.innerHTML = `You caught a(n) ${names2[pokemonnum]}`
+				 	
+
+
+
+				 	if (names2[pokemonnum] == 'Pikachu'){
+				 		pikachu_num += 1
+				 		all_string = "Pikachu found" + all_string
+				 	}
+				 	else if (names2[pokemonnum] == 'Bulbasaur'){
+				 		bulbasaur_num += 1
+				 		all_string = "Bulbasaur found" + all_string
+				 	}
+				 	else if (names2[pokemonnum] == 'Charmander'){
+				 		charmander_num += 1
+				 		all_string = "Charmander found" + all_string
+				 	}
+				 	else if (names2[pokemonnum] == 'Eevee'){
+				 		eevee_num += 1
+				 		all_string = "Eevee found" + all_string
+				 	}
+				 	else{
+				 		squirtle_num += 1
+				 		all_string = "Squirtle found" + all_string
+				 	}
+
+
+				 	names2.splice(pokemonnum,1)
+
+				 	
+
+				 	if (pokemon2.length != 0){
+				 		pokemonCaught += 1;
+
+				 	}
+
+				 	else{
+				 		pokemonCaught += 0
+
+				 		
+
+				 		
+				 	}
+				 }
+
+				 else if (chance == 1){
+				 	g2.src = 'images/pokeballs.png';
+				 	pokeBalls += 2;
+				 	progress.innerHTML = "You found two Pokeballs!"
+				 	all_string = "Pokeballs found" + all_string
+				 }
+
+				 else{
+				 	g2.src = '';
+				 	progress.innerHTML = 'Nothing here!'
+				 	all_string = "Nothing here!" + all_string
+				 }
+
+				outputPokeballs.innerHTML = 'Pokeballs Left ' + pokeBalls ////  //////
+				outputPokecaught.innerHTML = 'Pokemon Caught ' + pokemonCaught		
+
+				playAgain.style.display = 'block'  //  ///to show the button!
+
+				lock = true
+
+			}
+
+
+			else if ((pokeBalls >0) && lock == true){
+
+				gameover.style.display='none';
+				over = 'False'
+
+
+			}
+
+			else{
+				
+				g2.src = 'images/grass.png'
+				gameover.style.display='flex'
+				over = "True"
+				all_history.innerHTML = all_string
+
+			}
+
+			if (over == 'True'){
+
+				pokemonCaught = 0
+				pokeBalls = 5
+
+				gameover.style.display = 'flex'
+
+				over = 'False'
+
+				final.innerHTML = `${pikachu_num} ${names2[0]}, ${bulbasaur_num} ${names2[1]}, ${charmander_num} ${names2[2]}, ${eevee_num} ${names2[3]}, ${squirtle_num} ${names2[4]} `
+
+				if (pikachu_num>=1 && bulbasaur_num>=1 && charmander_num>=1 && eevee_num>=1 && squirtle_num>=1){
+					special_message.innerHTML='Congrats! You caught at least one of each kind!'
+				}
+
+			}
+			else{
+				gameover.style.display = 'none'
+				pokemon2 = ['images/pikachu.png', 'images/bulbasaur.png', 'images/charmander.png', 'images/eevee.png', 'images/squirtle.png'];
+				names2 = ['Pikachu', 'Bulbasaur', 'Charmander', 'Eevee', 'Squirtle'];
+
+			}
+		}
+
+
+
+
+		g3.onclick = function (){     // //  
+
+
+			if ((pokeBalls > 0) && lock == false){
+
+				pokeBalls -= 1;
+
+				let chance = parseInt(Math.random() *3);
+				 if (chance == 0){
+				 	let pokemonnum = parseInt(Math.random() * pokemon3.length)
+				 	g3.src = pokemon3[pokemonnum];  //  // change the image url!!! ////
+				 	pokemon3.splice(pokemonnum,1)
+
+				 	progress.innerHTML = `You caught a(n) ${names3[pokemonnum]}`
+
+
+				 	if (names3[pokemonnum] == 'Pikachu'){
+				 		
+				 		pikachu_num += 1
+				 		all_string = "Pikachu found" + all_string
+				 	}
+				 	else if (names3[pokemonnum] == 'Bulbasaur'){
+				 		bulbasaur_num += 1
+				 		all_string = "Bulbasaur found" + all_string
+				 		
+				 	}
+				 	else if (names3[pokemonnum] == 'Charmander'){
+				 		charmander_num += 1
+				 		all_string = "Charmander found" + all_string
+				 		
+				 	}
+				 	else if (names3[pokemonnum] == 'Eevee'){
+				 		eevee_num += 1
+				 		all_string = "Eevee found" + all_string
+				 		
+				 	}
+				 	else{
+				 		squirtle_num += 1
+				 		all_string = "Squirtle found" + all_string
+				 	}
+
+
+				 	names3.splice(pokemonnum,1)
+
+
+
+
+
+
+
+				 	
+
+				 	if (pokemon3.length != 0){
+				 		pokemonCaught += 1;
+				 		
+				 	}
+
+				 	else{
+				 		pokemonCaught += 0
+				 		
+				 	}
+				 }
+
+				 else if (chance == 1){
+				 	g3.src = 'images/pokeballs.png';
+				 	pokeBalls += 2;
+				 	progress.innerHTML = "You found two Pokeballs here!"
+				 	all_string = "Pokeballs found" + all_string
+				 }
+
+				 else{
+				 	g3.src = '';
+				 	progress.innerHTML = "Nothing here!"
+				 	all_string = "Nothing found" + all_string
+				 }
+
+				outputPokeballs.innerHTML = 'Pokeballs Left ' + pokeBalls ////  //////
+				outputPokecaught.innerHTML = 'Pokemon Caught ' + pokemonCaught		
+
+				playAgain.style.display = 'block'  //  ///to show the button!
+
+				lock = true
+
+
+			}
+
+			else if ((pokeBalls >0) && lock == true){
+
+				gameover.style.display='none';
+				over = 'False'
+
+
+			}
+
+			else{
+				
+				g3.src = 'images/grass.png'
+
+				gameover.style.display='flex'
+
+				over = "True"
+				all_history.innerHTML = all_string
+
+			}
+
+			if (over == 'True'){
+
+				pokemonCaught = 0
+				pokeBalls = 5
+
+				gameover.style.display = 'flex'
+
+				over = 'False'
+
+				final.innerHTML = `${pikachu_num} ${names3[0]}, ${bulbasaur_num} ${names3[1]}, ${charmander_num} ${names3[2]}, ${eevee_num} ${names3[3]}, ${squirtle_num} ${names3[4]} `
+
+				if (pikachu_num>=1 && bulbasaur_num>=1 && charmander_num>=1 && eevee_num>=1 && squirtle_num>=1){
+					special_message.innerHTML='Congrats! You caught at least one of each kind!'
+				}
+
+
+
+			}
+			else{
+				gameover.style.display = 'none'
+				pokemon3 = ['images/pikachu.png', 'images/bulbasaur.png', 'images/charmander.png', 'images/eevee.png', 'images/squirtle.png'];
+				names3 = ['Pikachu', 'Bulbasaur', 'Charmander', 'Eevee', 'Squirtle'];
+
+			}
+		}
+
+
+		//write a function for playagain:
+		playAgain.onclick = function(){
+			g1.src = 'images/grass.png'
+			g2.src = 'images/grass.png'
+			g3.src = 'images/grass.png'
+			playAgain.style.display = 'none'
+
+			lock = false
+		}
+
+
+		clean_history.onclick = function(){
+			pikachu_num = 0;
+			bulbasaur_num = 0;
+			charmander_num = 0;
+			eevee_num = 0;
+			squirtle_num = 0;
+			result.innerHTML = ' '
+			all_history.innerHTML = ''
+		}
+
+
+
+
+
+
+
+	</script>
+
+
+
+</body>
+</html>
