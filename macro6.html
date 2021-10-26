@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Assignment 06: Matching Game</title>
+	<style type="text/css">
+		body{
+			background-color: black;
+			color:white;
+			font-family: monospace;
+			text-align: center;
+		}
+
+		.hidden{
+			display: none;
+		}
+
+		#tokens{
+			width: 400px;
+			height: 300px;
+			margin: auto;   /* CENTER all the tokens */
+		}
+
+		#tokens img{        /* each img in the token! */
+			width: 100px;
+			height: 100px;
+		}
+
+	</style>
+</head>
+<body>
+
+	<!--start screen-->
+	<div id='screen_start'>
+		<h1>Memory Matching Madness</h1>
+		<p>Instruction go here:</p>
+
+		<button id="start">Start</button>
+		
+	</div>
+
+	
+
+	<!--game play screen-->
+
+	<div id="screen_game" class='hidden'>  <!--hidden class!!!-->
+		<div id="timer"> 0 seconds</div>
+		<div id="tokens">
+
+		</div>
+		
+	</div>
+
+
+	<!--game over screen-->
+	<div id="screen_gameover" class="hidden">
+		<p style="font-size: 50px;">GAME OVER!</p>
+		<br><br>
+		<div id="over_time" style="font-size: 18px;">Your time was ... that didn't beat the best time</div>
+		<br>
+		<div id='best_time' style="font-size: 18px;">Best Time:</div>
+		<br><br>
+		<button id="again" style="font-size: 18px;">Play Again</button>
+		
+	</div>
+
+
+	<script type="text/javascript">
+		//isolate our DOM queries:
+		let screen_start = document.querySelector('#screen_start')
+		let screen_game = document.querySelector('#screen_game')
+		let screen_gameover = document.querySelector('#screen_gameover')
+		let start = document.querySelector('#start')
+		let playagain = document.querySelector('#again')
+
+		let tokens = document.querySelector('#tokens')
+
+
+
+		//vars to keep track of which element were clicked:
+		let token1 = false;
+		let token2 = false;
+
+		let position1 = 0
+		let position2 = 0
+
+
+		//detect all matches: set a global variable. if having 6 matches, move on to the next phase
+		let num_matches = 0;
+
+		let totalTime = 0;
+		let totalTime_previous = 100000000000000000;
+
+
+		//array of all pokemon grpahics:
+		var assets = ['snorlax.png', 'electrabuzz.png', 'chansey.png', 'oddish.png',
+              'pikachu.png', 'paras.png', 'arcanine.png', 'ponita.png',
+              'venonat.png', 'eggsecute.png', 'machop.png', 'pidgey.png',
+              'psyduck.png', 'tauros.png', 'vulpix.png', 'gloom.png',
+              'krabby.png', 'butterfree.png', 'bulbasaur.png', 'clefairy.png',
+              'koffing.png', 'goldeen.png', 'magikarp.png', 'beedrill.png',
+              'lapras.png', 'meowth.png', 'ekans.png', 'jigglypuff.png',
+              'horsea.png', 'polywog.png', 'sandshrew.png', 'rattata.png',
+              'gengar.png', 'eevee.png', 'bellsprout.png', 'squirtle.png',
+              'seel.png', 'caterpie.png']
+
+        var audioT = new Audio('assignment06_images/correct.wav')
+		var audioF = new Audio('assignment06_images/wrong.wav')
+
+
+		//when the user clicks start, we need to show game playing screen
+		start.addEventListener('click', function(){
+
+
+			//figure out the timer feature: setInterval
+			var starT = Date.now();
+			var ttt = setInterval(function(){      ////// TIMER!!!! //////
+				var delta = Date.now() - starT;
+				timing = Math.floor(delta/1000);
+
+				document.querySelector('#timer').innerText = `${timing}`+' seconds'
+			}, 1000);
+
+
+			//make the start screen invisible:
+			screen_start.classList.add('hidden')  //add .hidden to the class list!
+
+			//show the play screen
+			screen_game.classList.remove('hidden') //remove
+
+			//create 12 balls to click on:  need event listenr & data set !!!!!!
+			//pick 6 randomly then make a copy
+			let pickedPokemon = [];
+
+			for (let i = 0; i<6; i++){
+				let randomP = parseInt(Math.random() * assets.length); 
+				pickedPokemon.push( assets[randomP] )    //add a random one
+				pickedPokemon.push( assets[randomP] )    //do it twice!
+
+				assets.splice(randomP, 1)  //remove it so that we don;t pick the same one twice
+			}
+
+			console.log(pickedPokemon);
+
+			//randomize the pokemon in our picked array:
+
+			let counter = 0
+			while (pickedPokemon.length>0){   //as long as there is at least one left:
+
+				counter += 1
+
+				let tempImage = document.createElement('img')  //////createElement////
+				tempImage.src = 'assignment06_images/pokeball.png';
+
+				//set secret img
+				let secretIndex = parseInt(Math.random() * pickedPokemon.length)
+				tempImage.dataset.secret = pickedPokemon[secretIndex]  //set the dataset for secret image!!!
+				tempImage.dataset.position = counter
+
+				pickedPokemon.splice(secretIndex, 1)
+
+				tokens.appendChild(tempImage);  ////appendChild////
+
+				if (token1 != false && token2 != false){    //click spamming: only allow two clicks!
+					tempImage.addEventListener('click', function(event){
+						event.currentTarget.src = event.currentTarget.src
+					})
+				}
+
+				else{
+					//template change
+					tempImage.addEventListener('click', function(event){
+
+						//if this is the first one click, show the img
+						if (token1 == false){
+
+							//this becomes token1 !
+							token1 = event.currentTarget; //token1 is not false anymore!
+
+							//reveal the secret image:
+							event.currentTarget.src = 'assignment06_images/'+event.currentTarget.dataset.secret ////prefix this path by ADDING the FOLDER NAME!!!////
+
+							position1 = event.currentTarget.dataset.position
+
+						}
+
+						//if second, need to evaluate
+						else{
+
+							//must be on token2
+							token2 = event.currentTarget;
+
+							//reveal the secret image:
+							event.currentTarget.src = 'assignment06_images/'+event.currentTarget.dataset.secret ////prefix this path by ADDING the FOLDER NAME!!!////
+							position2 = event.currentTarget.dataset.position
+
+							//evaluate
+							if ((token1.dataset.secret == token2.dataset.secret)&& (position1 != position2)){ //prevent to click the same thing twice
+								console.log('MATCH!')
+								audioT.play()
+
+
+								num_matches += 1
+								console.log(num_matches)
+								
+								//reset the program immediately after the match!!!!!
+								token1 = false;
+								token2 = false;
+
+								//when all the matches have been detected, take the user to the game over screen!
+								if (num_matches==6){
+									console.log('STOP')
+									screen_game.classList.add('hidden')
+									screen_gameover.classList.remove('hidden')
+									clearInterval(ttt)
+
+									//get the time
+									totalTime = timing
+									document.querySelector('#over_time').innerText = 'Your time: '+`${totalTime}`
+
+									//game over screen: a way to keep track of the highest score: local storage
+									if (window.localStorage.getItem('previous time') == null){
+										window.localStorage.setItem('previous time',totalTime_previous);
+									}
+									
+									let previousTime = window.localStorage.getItem('previous time');
+									if(totalTime<previousTime){
+										window.localStorage.setItem('the best time',totalTime);
+									}
+
+									window.localStorage.setItem('previous time',totalTime);
+
+									let TheBestTime = window.localStorage.getItem('the best time');
+									document.querySelector('#best_time').innerText = 'Best time: '+`${TheBestTime}`
+								}
+							}
+							else{
+								//in .5 seconds reset the tokens:
+								setTimeout(reset, 500)          //////  setTimeout  //////
+								audioF.play()
+							}
+						}
+					});
+
+				}
+			}
+		});
+
+
+		//set a delay to the second token so that the user can see what's behind before it flips if not matching
+		function reset(){
+			//hide both tokens with the pokeball image
+			token1.src = 'assignment06_images/pokeball.png'
+			token2.src = 'assignment06_images/pokeball.png'
+
+			//flip the tokens back to false to reset for the next match
+			token1 = false;
+			token2 = false;
+		}
+
+
+		//go back to the beginning screen to restart
+		playagain.addEventListener('click', function(){
+			screen_start.classList.remove('hidden')
+			screen_gameover.classList.add('hidden')
+			num_matches=0
+		})
+
+		
+
+	</script>
+
+</body>
+</html>
+
+
+
+
+
